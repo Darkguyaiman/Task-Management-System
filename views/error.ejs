@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-3"><%= message %></h1>
+    <% if (error) { %>
+      <pre class="bg-light p-3 rounded"><%= error.message %></pre>
+    <% } %>
+    <a href="/" class="btn btn-primary">Go to Dashboard</a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

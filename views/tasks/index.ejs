@@ -1,0 +1,150 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="mb-0">Tasks</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Create Task</h2>
+        <% if (formError) { %>
+          <div class="alert alert-danger py-2"><%= formError %></div>
+        <% } %>
+        <form method="POST" action="/tasks" class="d-grid gap-3">
+          <div>
+            <label class="form-label" for="user_id">User</label>
+            <select class="form-select" id="user_id" name="user_id" required>
+              <option value="">Choose user</option>
+              <% users.forEach((user) => { %>
+                <option value="<%= user.id %>" <%= String(oldInput.user_id || '') === String(user.id) ? 'selected' : '' %>>
+                  <%= user.name %> (<%= user.email %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="kpi_category_id">KPI Category</label>
+            <select class="form-select" id="kpi_category_id" name="kpi_category_id" required>
+              <option value="">Choose category</option>
+              <% categories.forEach((category) => { %>
+                <option value="<%= category.id %>" <%= String(oldInput.kpi_category_id || '') === String(category.id) ? 'selected' : '' %>>
+                  <%= category.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="title">Title</label>
+            <input class="form-control" id="title" name="title" value="<%= oldInput.title || '' %>" required />
+          </div>
+          <div>
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"><%= oldInput.description || '' %></textarea>
+          </div>
+          <div>
+            <label class="form-label" for="status">Status</label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="pending" <%= (oldInput.status || '') === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="in_progress" <%= (oldInput.status || '') === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+              <option value="completed" <%= (oldInput.status || '') === 'completed' ? 'selected' : '' %>>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="due_date">Due Date</label>
+            <input class="form-control" id="due_date" name="due_date" type="date" value="<%= oldInput.due_date || '' %>" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Create Task</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Filters</h2>
+        <form method="GET" action="/tasks" class="d-grid gap-3">
+          <div>
+            <label class="form-label" for="filter_user">User</label>
+            <select class="form-select" id="filter_user" name="user_id">
+              <option value="">All users</option>
+              <% users.forEach((user) => { %>
+                <option value="<%= user.id %>" <%= String(filters.user_id || '') === String(user.id) ? 'selected' : '' %>>
+                  <%= user.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="filter_status">Status</label>
+            <select class="form-select" id="filter_status" name="status">
+              <option value="">All statuses</option>
+              <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+              <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="filter_due_date">Due Date</label>
+            <input class="form-control" id="filter_due_date" name="due_date" type="date" value="<%= filters.due_date || '' %>" />
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-secondary flex-fill" type="submit">Apply</button>
+            <a class="btn btn-outline-secondary flex-fill" href="/tasks">Reset</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Task List</h2>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>User</th>
+                <th>KPI</th>
+                <th>Status</th>
+                <th>Due</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (tasks.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">No tasks found.</td>
+                </tr>
+              <% } %>
+              <% tasks.forEach((task) => { %>
+                <tr>
+                  <td><%= task.id %></td>
+                  <td>
+                    <div class="fw-semibold"><%= task.title %></div>
+                    <div class="small text-muted"><%= task.description || 'No description' %></div>
+                  </td>
+                  <td><%= task.user_name %></td>
+                  <td><%= task.kpi_category_name %></td>
+                  <td><span class="badge text-bg-light"><%= task.status %></span></td>
+                  <td><%= new Date(task.due_date).toLocaleDateString() %></td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" href="/tasks/<%= task.id %>/edit">Edit</a>
+                    <form method="POST" action="/tasks/<%= task.id %>/delete" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Delete this task?')">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

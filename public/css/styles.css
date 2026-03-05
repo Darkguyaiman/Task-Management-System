@@ -1,0 +1,20 @@
+body {
+  background-color: #f6f8fb;
+}
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.stat-card .display-6 {
+  font-weight: 700;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
