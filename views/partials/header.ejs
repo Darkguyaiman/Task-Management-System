@@ -8,40 +8,17 @@
   <link rel="icon" href="/favicon.ico" />
 </head>
 <body>
-  <div class="min-h-screen flex flex-col">
+  <div class="h-screen flex flex-col">
     <header style="border-bottom: 1px solid var(--border-light); background-color: var(--bg-surface);">
       <div class="w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-6">
-          <a href="/" class="flex items-center gap-2.5 text-sm font-semibold tracking-tight" style="color: var(--color-dark);">
-            <img src="/QSS.webp" alt="Logo" class="w-8 h-8 rounded-lg object-contain" />
-            <span class="hidden sm:inline">Task Management System</span>
-            <span class="sm:hidden">TMS</span>
-          </a>
-          <% if (currentUser) { %>
-            <nav class="flex lg:hidden items-center gap-1">
-              <a href="/" class="nav-link<%= currentPath === '/' ? ' active' : '' %>">Dashboard</a>
-              <a href="/tasks" class="nav-link<%= currentPath.startsWith('/tasks') ? ' active' : '' %>">Tasks</a>
-              <% if (currentUser.role === 'admin') { %>
-                <a href="/users" class="nav-link<%= currentPath.startsWith('/users') ? ' active' : '' %>">Users</a>
-              <% } %>
-            </nav>
-          <% } %>
-        </div>
-        <div class="flex items-center gap-3">
-          <% if (currentUser) { %>
-            <form method="POST" action="/logout" class="lg:hidden">
-              <button type="submit"
-                class="inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-medium cursor-pointer"
-                style="border: 1px solid var(--border-default); color: var(--text-secondary); background: transparent; transition: all 150ms ease;">
-                Logout
-              </button>
-            </form>
-          <% } %>
-        </div>
+        <a href="/" class="flex items-center gap-2.5 text-sm font-semibold tracking-tight" style="color: var(--color-dark);">
+          <img src="/favicon.ico" alt="Logo" class="w-8 h-8 rounded-lg object-contain" />
+          <span>Task Management System</span>
+        </a>
       </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
       <%- include('sidebar') %>
-      <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6">
         <div class="mx-auto w-full max-w-6xl">

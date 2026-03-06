@@ -6,6 +6,7 @@ const indexRoutes = require('./routes/indexRoutes');
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
@@ -72,6 +73,7 @@ app.use(authRoutes);
 app.use('/', indexRoutes);
 app.use('/users', userRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/profile', profileRoutes);
 
 app.use((req, res) => {
   res.status(404).render('error', { message: 'Page not found', error: null });

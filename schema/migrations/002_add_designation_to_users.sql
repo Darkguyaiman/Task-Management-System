@@ -1,0 +1,3 @@
+ALTER TABLE users
+  ADD COLUMN designation VARCHAR(120) NULL DEFAULT NULL
+  AFTER role;

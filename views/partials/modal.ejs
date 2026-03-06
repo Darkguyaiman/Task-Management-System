@@ -1,0 +1,216 @@
+<!-- Reusable Alert Modal — supports: success, confirm, error -->
+<div id="alertModal" class="modal-overlay" style="display:none;">
+  <div class="modal-panel">
+    <div class="modal-icon-wrapper" id="modalIconWrapper">
+      <!-- Icon injected by JS -->
+    </div>
+    <h3 class="modal-title" id="modalTitle"></h3>
+    <p class="modal-message" id="modalMessage"></p>
+    <div class="modal-actions" id="modalActions">
+      <!-- Buttons injected by JS -->
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(22, 29, 35, 0.45);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .modal-overlay.modal-visible {
+    opacity: 1;
+  }
+
+  .modal-panel {
+    background: var(--bg-surface);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    padding: 28px 28px 22px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: scale(0.92) translateY(8px);
+    transition: transform 0.2s ease;
+  }
+  .modal-overlay.modal-visible .modal-panel {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .modal-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .modal-icon-success {
+    background-color: var(--status-completed-bg);
+    color: var(--status-completed-text);
+  }
+  .modal-icon-confirm {
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-text);
+  }
+  .modal-icon-error {
+    background-color: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin: 0 0 6px;
+  }
+  .modal-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 22px;
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .modal-btn {
+    flex: 1;
+    max-width: 160px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.15s, box-shadow 0.15s;
+  }
+  .modal-btn:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
+  .modal-btn-cancel {
+    background: var(--bg-soft);
+    color: var(--text-secondary);
+  }
+  .modal-btn-cancel:hover {
+    background: var(--bg-muted);
+  }
+
+  .modal-btn-success {
+    background: var(--status-completed-text);
+    color: #fff;
+  }
+  .modal-btn-success:hover {
+    opacity: 0.9;
+  }
+
+  .modal-btn-confirm {
+    background: var(--accent-primary);
+    color: var(--color-dark);
+  }
+  .modal-btn-confirm:hover {
+    background: var(--accent-hover);
+  }
+
+  .modal-btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+  .modal-btn-danger:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<script>
+  (function () {
+    var overlay = document.getElementById('alertModal');
+    var iconWrapper = document.getElementById('modalIconWrapper');
+    var titleEl = document.getElementById('modalTitle');
+    var messageEl = document.getElementById('modalMessage');
+    var actionsEl = document.getElementById('modalActions');
+
+    var icons = {
+      success: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      confirm: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>',
+      error: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+
+    function close() {
+      overlay.classList.remove('modal-visible');
+      setTimeout(function () { overlay.style.display = 'none'; }, 200);
+    }
+
+    function open(type, title, message, onResult) {
+      iconWrapper.className = 'modal-icon-wrapper modal-icon-' + type;
+      iconWrapper.innerHTML = icons[type] || icons.confirm;
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      actionsEl.innerHTML = '';
+
+      if (type === 'confirm') {
+        var cancelBtn = document.createElement('button');
+        cancelBtn.className = 'modal-btn modal-btn-cancel';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = function () { close(); if (onResult) onResult(false); };
+
+        var okBtn = document.createElement('button');
+        okBtn.className = 'modal-btn modal-btn-danger';
+        okBtn.textContent = 'Delete';
+        okBtn.onclick = function () { close(); if (onResult) onResult(true); };
+
+        actionsEl.appendChild(cancelBtn);
+        actionsEl.appendChild(okBtn);
+      } else if (type === 'error') {
+        var btn = document.createElement('button');
+        btn.className = 'modal-btn modal-btn-danger';
+        btn.textContent = 'Dismiss';
+        btn.onclick = function () { close(); if (onResult) onResult(); };
+        actionsEl.appendChild(btn);
+      } else {
+        var btn = document.createElement('button');
+        btn.className = 'modal-btn modal-btn-success';
+        btn.textContent = 'OK';
+        btn.onclick = function () { close(); if (onResult) onResult(); };
+        actionsEl.appendChild(btn);
+      }
+
+      overlay.style.display = 'flex';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          overlay.classList.add('modal-visible');
+        });
+      });
+    }
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+    });
+
+    window.AlertModal = {
+      success: function (title, message, cb) { open('success', title, message, cb); },
+      confirm: function (title, message, cb) { open('confirm', title, message, cb); },
+      error: function (title, message, cb) { open('error', title, message, cb); }
+    };
+  })();
+</script>

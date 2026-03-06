@@ -6,34 +6,410 @@
   <title>Login | Task Management System</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    body { background: var(--bg-page); }
+
+    .auth-split {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ───── Left hero panel ───── */
+    .auth-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2.5rem 3rem;
+      background:
+        radial-gradient(ellipse at 10% 90%, rgba(94, 141, 131, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 10%, rgba(229, 184, 11, 0.1) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(94, 141, 131, 0.06) 0%, transparent 70%),
+        linear-gradient(160deg, #eef3f2 0%, #e4ecea 30%, #dbe7e4 60%, #e8edec 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-middle {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--color-dark);
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .hero-title span {
+      color: var(--accent-primary);
+    }
+    .hero-desc {
+      font-size: 0.925rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-width: 26rem;
+    }
+
+    .hero-quote-card {
+      margin-top: 1.75rem;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--border-light);
+      border-radius: 0.875rem;
+      padding: 1.25rem 1.35rem;
+      display: flex;
+      gap: 0.9rem;
+      align-items: flex-start;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .quote-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(229, 184, 11, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.15rem;
+      font-size: 0.85rem;
+      color: var(--accent-primary);
+    }
+    .hero-quote-text {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--color-dark);
+      line-height: 1.6;
+      margin-bottom: 0.45rem;
+    }
+    .hero-quote-author {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* ───── Right form panel ───── */
+    .auth-form-panel {
+      width: 480px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 3.25rem;
+      background: #ffffff;
+    }
+
+    .form-header {
+      margin-bottom: 2rem;
+    }
+    .form-header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .form-logo {
+      width: 3.25rem;
+      height: 3.25rem;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .form-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--color-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+    .form-header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.35rem;
+    }
+    .login-form .form-label {
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-primary);
+    }
+    .login-form .input-field {
+      padding: 0.7rem 0.875rem;
+      border-radius: 0.625rem;
+      border: 1.5px solid var(--border-default);
+      font-size: 0.9rem;
+      background: #ffffff;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .login-form .input-field:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(229, 184, 11, 0.12);
+    }
+    .login-form .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .submit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 0.625rem;
+      background: var(--accent-primary);
+      color: #ffffff;
+      font-size: 0.925rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(229, 184, 11, 0.3);
+      transition: all 200ms ease;
+    }
+    .submit-btn:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 16px rgba(229, 184, 11, 0.35);
+      transform: translateY(-1px);
+    }
+    .submit-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(229, 184, 11, 0.2);
+    }
+    .submit-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .form-footer {
+      margin-top: 1.75rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .form-footer a {
+      color: var(--color-soft);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+    .form-footer a:hover {
+      color: var(--accent-primary);
+    }
+
+    /* ───── Password toggle ───── */
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper .input-field {
+      padding-right: 2.75rem;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 150ms ease;
+    }
+    .pw-toggle:hover { color: var(--text-secondary); }
+    .pw-toggle svg { width: 18px; height: 18px; }
+
+    /* ───── Error alert override ───── */
+    .login-form .error-alert {
+      margin-bottom: 0;
+    }
+
+    /* ───── Entrance animations ───── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideRight {
+      from { opacity: 0; transform: translateX(-22px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeSlideLeft {
+      from { opacity: 0; transform: translateX(22px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(229, 184, 11, 0); }
+      50%      { box-shadow: 0 0 12px 2px rgba(229, 184, 11, 0.15); }
+    }
+
+    .hero-title {
+      animation: fadeSlideRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+    }
+    .hero-desc {
+      animation: fadeSlideRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+    }
+    .hero-quote-card {
+      animation: fadeSlideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+    }
+    .form-header {
+      animation: fadeSlideLeft 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+    .login-form > *:nth-child(1) {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+    }
+    .login-form > *:nth-child(2) {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+    }
+    .login-form > *:nth-child(3) {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+    }
+    .form-footer {
+      animation: fadeIn 0.6s ease 0.7s both;
+    }
+
+    /* ───── Hover effects ───── */
+    .hero-quote-card {
+      transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
+    }
+    .hero-quote-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(22, 29, 35, 0.08);
+      background: rgba(255, 255, 255, 0.75);
+    }
+    .quote-icon {
+      transition: transform 300ms ease, background 300ms ease;
+    }
+    .hero-quote-card:hover .quote-icon {
+      transform: scale(1.12) rotate(-8deg);
+      background: rgba(229, 184, 11, 0.25);
+    }
+    .login-form .input-field {
+      transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+    }
+    .login-form .input-field:hover:not(:focus) {
+      border-color: var(--border-strong);
+    }
+    .submit-btn {
+      transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+    }
+    .submit-btn:hover svg {
+      animation: pulseGlow 1.5s ease infinite;
+    }
+    .form-footer a {
+      transition: color 200ms ease, letter-spacing 200ms ease;
+    }
+    .form-footer a:hover {
+      letter-spacing: 0.02em;
+    }
+    .hero-title span {
+      transition: text-shadow 300ms ease;
+    }
+    .hero-title:hover span {
+      text-shadow: 0 0 20px rgba(229, 184, 11, 0.3);
+    }
+
+    /* ───── Mobile responsive ───── */
+    @media (max-width: 900px) {
+      .auth-split {
+        flex-direction: column;
+      }
+      .auth-hero {
+        padding: 2rem 1.75rem 1.75rem;
+        min-height: auto;
+      }
+      .hero-title {
+        font-size: 1.8rem;
+      }
+      .hero-middle {
+        margin: 1rem 0;
+      }
+      .auth-form-panel {
+        width: 100%;
+        padding: 2rem 1.75rem 2.5rem;
+        border-radius: 1.5rem 1.5rem 0 0;
+        margin-top: -1rem;
+        position: relative;
+        z-index: 2;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen flex items-center justify-center px-4">
-  <div class="w-full max-w-sm">
-    <div class="mb-8 text-center space-y-2">
-      <img src="/QSS.webp" alt="Logo" class="w-14 h-14 rounded-xl object-contain mx-auto mb-3" />
-      <h1 class="text-xl font-semibold tracking-tight" style="color: var(--color-dark);">
-        Task Management System
-      </h1>
-      <p class="text-sm" style="color: var(--text-muted);">
-        Sign in to continue.
-      </p>
+<body>
+  <div class="auth-split">
+
+    <!-- ───── Left hero ───── -->
+    <div class="auth-hero">
+      <div class="hero-middle">
+        <h2 class="hero-title">
+          Welcome back to<br />
+          Task Manager
+        </h2>
+        <p class="hero-desc">
+          Sign in to manage your tasks, track progress, and stay on top of your workflow.
+        </p>
+
+        <div class="hero-quote-card">
+          <div class="quote-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <div>
+            <p class="hero-quote-text" id="quote-text"></p>
+            <p class="hero-quote-author" id="quote-author"></p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="card space-y-5" style="box-shadow: var(--shadow-md);">
-      <div class="space-y-1">
-        <h2 class="text-sm font-semibold" style="color: var(--color-dark);">Login</h2>
-        <p class="text-xs" style="color: var(--text-muted);">
-          Enter your credentials to continue.
-        </p>
+    <!-- ───── Right form ───── -->
+    <div class="auth-form-panel">
+      <div class="form-header">
+        <div class="form-header-row">
+          <img src="/favicon.ico" alt="Logo" class="form-logo" />
+          <div>
+            <h1>Sign In</h1>
+            <p>Authenticate to access your dashboard.</p>
+          </div>
+        </div>
       </div>
 
       <% if (formError) { %>
-        <div class="error-alert"><%= formError %></div>
+        <div class="error-alert" style="margin-bottom: 1.35rem;"><%= formError %></div>
       <% } %>
 
-      <form method="POST" action="/login" class="space-y-4">
+      <form method="POST" action="/login" class="login-form">
         <div>
-          <label for="email" class="form-label">Email</label>
+          <label for="email" class="form-label">Username or Email</label>
           <input
             id="email"
             name="email"
@@ -48,7 +424,7 @@
 
         <div>
           <label for="password" class="form-label">Password</label>
-          <div class="relative">
+          <div class="password-wrapper">
             <input
               id="password"
               name="password"
@@ -56,46 +432,81 @@
               required
               placeholder="Enter your password"
               class="input-field"
-              style="padding-right: 2.75rem;"
             />
-            <button
-              type="button"
-              id="toggle-password"
-              class="absolute right-0 top-0 h-full px-3 flex items-center justify-center cursor-pointer"
-              style="color: var(--text-muted); background: none; border: none;"
-              aria-label="Toggle password visibility"
-            >
-              <svg id="eye-show" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <button type="button" id="toggle-password" class="pw-toggle" aria-label="Toggle password visibility">
+              <svg id="eye-show" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <svg id="eye-hide" class="w-4.5 h-4.5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <svg id="eye-hide" style="display:none;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
               </svg>
             </button>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary w-full">
-          Sign in
+        <button type="submit" class="submit-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Sign In
         </button>
       </form>
+
+      <div class="form-footer">
+        Need support? <a href="https://wa.me/601121194948" target="_blank">Contact platform owner</a>
+      </div>
     </div>
+
   </div>
 
   <script>
+    var quotes = [
+      { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+      { text: "It is not enough to be busy; so are the ants. The question is: what are we busy about?", author: "Henry David Thoreau" },
+      { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+      { text: "Until we can manage time, we can manage nothing else.", author: "Peter Drucker" },
+      { text: "Productivity is never an accident. It is always the result of a commitment to excellence.", author: "Paul J. Meyer" },
+      { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+      { text: "Your mind is for having ideas, not holding them.", author: "David Allen" },
+      { text: "Amateurs sit and wait for inspiration, the rest of us just get up and go to work.", author: "Stephen King" },
+      { text: "You don\u2019t need a new plan for next year. You need a commitment.", author: "Seth Godin" },
+      { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+      { text: "Either you run the day or the day runs you.", author: "Jim Rohn" },
+      { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+      { text: "Efficiency is doing things right; effectiveness is doing the right things.", author: "Peter Drucker" },
+      { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+      { text: "What gets measured gets managed.", author: "Peter Drucker" },
+      { text: "Plans are nothing; planning is everything.", author: "Dwight D. Eisenhower" },
+      { text: "Do the hard jobs first. The easy jobs will take care of themselves.", author: "Dale Carnegie" },
+      { text: "It\u2019s not always that we need to do more but rather that we need to focus on less.", author: "Nathan W. Morris" },
+      { text: "Time is what we want most, but what we use worst.", author: "William Penn" },
+      { text: "A goal without a plan is just a wish.", author: "Antoine de Saint-Exup\u00E9ry" },
+      { text: "Don\u2019t count the days, make the days count.", author: "Muhammad Ali" },
+      { text: "Simplicity boils down to two steps: identify the essential, eliminate the rest.", author: "Leo Babauta" },
+      { text: "The key is not to prioritize what\u2019s on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
+      { text: "Where your attention goes, your time goes.", author: "Idowu Koyenikan" },
+      { text: "Excellence is a series of quiet, focused actions.", author: "Gary Keller" },
+      { text: "Nothing is less productive than to make more efficient what should not be done at all.", author: "Peter Drucker" }
+    ];
+    var pick = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('quote-text').textContent = '\u201C' + pick.text + '\u201D';
+    document.getElementById('quote-author').textContent = '\u2014 ' + pick.author;
+
     document.getElementById('toggle-password').addEventListener('click', function () {
       var input = document.getElementById('password');
       var show = document.getElementById('eye-show');
       var hide = document.getElementById('eye-hide');
       if (input.type === 'password') {
         input.type = 'text';
-        show.classList.add('hidden');
-        hide.classList.remove('hidden');
+        show.style.display = 'none';
+        hide.style.display = 'block';
       } else {
         input.type = 'password';
-        show.classList.remove('hidden');
-        hide.classList.add('hidden');
+        show.style.display = 'block';
+        hide.style.display = 'none';
       }
     });
   </script>

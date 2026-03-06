@@ -8,6 +8,7 @@ CREATE TABLE users (
   email VARCHAR(190) NOT NULL,
   password VARCHAR(255) NULL,
   role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff',
+  designation VARCHAR(120) NULL DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT uq_users_email UNIQUE (email)
 );

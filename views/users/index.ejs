@@ -1,143 +1,270 @@
 <%- include('../partials/header') %>
 
+<%
+  const hasFilters = filters.search || filters.role || filters.designation;
+%>
+
 <section class="space-y-8">
-  <div>
-    <h1 class="page-title">Users</h1>
-    <p class="page-subtitle">Manage staff who can be assigned to tasks.</p>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="page-title">Users</h1>
+      <p class="page-subtitle">Manage staff who can be assigned to tasks.</p>
+    </div>
+    <a href="/users/create" class="btn-primary">+ Add User</a>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] gap-6">
-    <div class="card space-y-4">
-      <h2 class="text-sm font-semibold" style="color: var(--color-dark);">Create User</h2>
-
-      <% if (formError) { %>
-        <div class="error-alert"><%= formError %></div>
-      <% } %>
-
-      <form method="POST" action="/users" class="space-y-4">
-        <div>
-          <label class="form-label" for="name">Name</label>
-          <input id="name" name="name" required class="input-field" placeholder="Full name"
-            value="<%= oldInput.name || '' %>" />
-        </div>
-
-        <div>
-          <label class="form-label" for="email">Email</label>
-          <input id="email" name="email" type="email" required class="input-field" placeholder="you@example.com"
-            value="<%= oldInput.email || '' %>" />
-        </div>
-
-        <div>
-          <label class="form-label" for="new-password">Password</label>
-          <div class="relative">
-            <input id="new-password" name="password" type="password" required minlength="6"
-              class="input-field" placeholder="Min. 6 characters"
-              style="padding-right: 2.75rem;" />
-            <button type="button" class="pw-toggle absolute right-0 top-0 h-full px-3 flex items-center justify-center cursor-pointer"
-              style="color: var(--text-muted); background: none; border: none;" aria-label="Toggle password visibility">
-              <svg class="eye-show w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <svg class="eye-hide w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="pt-1">
-          <button type="submit" class="btn-primary">Create User</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="card space-y-4 overflow-hidden">
-      <div>
-        <h2 class="text-sm font-semibold" style="color: var(--color-dark);">User List</h2>
-        <p class="text-xs mt-0.5" style="color: var(--text-muted);">
-          <%= users.length %> user<%= users.length !== 1 ? 's' : '' %> registered.
-        </p>
+  <div class="card overflow-hidden" style="padding: 0;">
+    <!-- Inline filter bar -->
+    <form method="GET" action="/users"
+      class="flex flex-wrap items-center gap-2 px-5 py-3"
+      style="background-color: var(--bg-soft); border-bottom: 1px solid var(--border-light);">
+      <div class="relative user-search-wrap" style="flex: 2 1 280px; min-width: 220px;">
+        <span class="user-search-icon" style="color: var(--text-muted); pointer-events: none;">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </span>
+        <input name="search" class="filter-input" style="width: 100%;"
+          placeholder="Search by name, email or designation..."
+          value="<%= filters.search || '' %>" />
       </div>
 
-      <div class="overflow-x-auto -mx-5">
-        <table class="min-w-full text-sm" style="border-top: 1px solid var(--border-light);">
-          <thead>
-            <tr style="background-color: var(--bg-soft);">
-              <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">ID</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Name</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Email</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Role</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Created</th>
-              <th class="px-5 py-2.5 text-right text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Actions</th>
+      <select name="role" class="filter-input" style="width: auto; min-width: 110px;">
+        <option value="">All roles</option>
+        <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+        <option value="staff" <%= filters.role === 'staff' ? 'selected' : '' %>>Staff</option>
+      </select>
+
+      <select name="designation" class="filter-input" style="width: auto; min-width: 140px;">
+        <option value="">All designations</option>
+        <% designations.forEach(function(d) { %>
+          <option value="<%= d %>" <%= filters.designation === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+      </select>
+
+      <button type="submit" class="filter-btn filter-btn-apply">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+        </svg>
+        Filter
+      </button>
+
+      <% if (hasFilters) { %>
+        <a href="/users" class="filter-btn filter-btn-reset">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Clear
+        </a>
+      <% } %>
+    </form>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr style="background-color: var(--bg-surface); border-bottom: 1px solid var(--border-light);">
+            <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Name</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Email</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Role</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Designation</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Created</th>
+            <th class="px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (users.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-10 text-center text-sm" style="color: var(--text-muted);">
+                No users found. <a href="/users/create" style="color: var(--color-soft); text-decoration: underline;">Create one</a>.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            <% if (users.length === 0) { %>
-              <tr>
-                <td colspan="6" class="px-5 py-10 text-center text-sm" style="color: var(--text-muted);">
-                  No users found. Create one above.
-                </td>
-              </tr>
-            <% } %>
-            <% users.forEach((user) => { %>
-              <tr class="table-row">
-                <td class="px-5 py-3 align-top text-xs whitespace-nowrap" style="color: var(--text-muted);">#<%= user.id %></td>
-                <td class="px-3 py-3 align-top">
-                  <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold shrink-0"
-                      style="background-color: var(--brand-soft); color: var(--color-soft);">
-                      <%= user.name.charAt(0).toUpperCase() %>
-                    </span>
-                    <span class="text-sm font-medium"><%= user.name %></span>
-                  </div>
-                </td>
-                <td class="px-3 py-3 align-top text-sm" style="color: var(--text-secondary);"><%= user.email %></td>
-                <td class="px-3 py-3 align-top">
-                  <% if (user.role === 'admin') { %>
-                    <span class="badge badge-in-progress">Admin</span>
-                  <% } else { %>
-                    <span class="badge" style="background-color: var(--bg-soft); color: var(--text-secondary);">Staff</span>
-                  <% } %>
-                </td>
-                <td class="px-3 py-3 align-top text-sm whitespace-nowrap" style="color: var(--text-secondary);">
-                  <%= new Date(user.created_at).toLocaleDateString() %>
-                </td>
-                <td class="px-5 py-3 align-top text-right">
-                  <form method="POST" action="/users/<%= user.id %>/delete" class="inline">
-                    <button type="submit" class="btn-sm-danger"
-                      onclick="return confirm('Delete this user? This also deletes related tasks.')">
-                      Delete
+          <% } %>
+          <% users.forEach((user) => { %>
+            <tr class="table-row">
+              <td class="px-5 py-3 align-top">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold shrink-0"
+                    style="background-color: var(--brand-soft); color: var(--color-soft);">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                  </span>
+                  <span class="text-sm font-medium"><%= user.name %></span>
+                </div>
+              </td>
+              <td class="px-3 py-3 align-top text-sm" style="color: var(--text-secondary);"><%= user.email %></td>
+              <td class="px-3 py-3 align-top">
+                <% if (user.role === 'admin') { %>
+                  <span class="badge badge-in-progress">Admin</span>
+                <% } else { %>
+                  <span class="badge" style="background-color: var(--bg-soft); color: var(--text-secondary);">Staff</span>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm" style="color: var(--text-secondary);">
+                <%= user.designation || '—' %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm whitespace-nowrap" style="color: var(--text-secondary);">
+                <%= new Date(user.created_at).toLocaleDateString() %>
+              </td>
+              <td class="px-5 py-3 align-top text-right">
+                <div class="flex items-center justify-center gap-1">
+                  <a href="/users/<%= user.id %>/edit" class="icon-btn" data-tooltip="Edit user">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                  </a>
+                  <form method="POST" action="/users/<%= user.id %>/delete" class="inline delete-form">
+                    <button type="button" class="icon-btn icon-btn-danger" data-tooltip="Delete user"
+                      onclick="confirmDelete(this)">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
                     </button>
                   </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
 
+<style>
+  .filter-input {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .filter-input::placeholder {
+    color: var(--text-muted);
+  }
+  .user-search-wrap .filter-input {
+    padding-left: 2.25rem;
+  }
+  .user-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .user-search-icon svg {
+    display: block;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .filter-btn-apply {
+    background: var(--accent-primary);
+    color: var(--color-dark);
+  }
+  .filter-btn-apply:hover {
+    background: var(--accent-hover);
+  }
+  .filter-btn-reset {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+  }
+  .filter-btn-reset:hover {
+    background: var(--bg-muted);
+    color: var(--text-primary);
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .icon-btn:hover {
+    background-color: var(--bg-soft);
+    color: var(--color-dark);
+  }
+  .icon-btn-danger:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+  }
+
+  .icon-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    background-color: var(--color-dark);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    border: 4px solid transparent;
+    border-top-color: var(--color-dark);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]:hover::after,
+  .icon-btn[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+</style>
+
 <script>
-  document.querySelectorAll('.pw-toggle').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var wrapper = this.closest('.relative');
-      var input = wrapper.querySelector('input');
-      var show = this.querySelector('.eye-show');
-      var hide = this.querySelector('.eye-hide');
-      if (input.type === 'password') {
-        input.type = 'text';
-        show.classList.add('hidden');
-        hide.classList.remove('hidden');
-      } else {
-        input.type = 'password';
-        show.classList.remove('hidden');
-        hide.classList.add('hidden');
-      }
-    });
-  });
+  function confirmDelete(btn) {
+    var form = btn.closest('form');
+    AlertModal.confirm(
+      'Delete User',
+      'Are you sure? This will also delete all tasks assigned to this user.',
+      function (confirmed) { if (confirmed) form.submit(); }
+    );
+  }
 </script>
 
 <%- include('../partials/footer') %>
