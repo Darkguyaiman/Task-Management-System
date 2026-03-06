@@ -1,0 +1,299 @@
+@import "tailwindcss";
+
+:root {
+  --color-dark: #161d23;
+  --color-muted: #576e6a;
+  --color-soft: #5e8d83;
+  --color-accent: #e5b80b;
+  --color-white: #ffffff;
+
+  --bg-page: #f7f9f8;
+  --bg-surface: #ffffff;
+  --bg-soft: #eef3f2;
+  --bg-muted: #e4ecea;
+
+  --text-primary: #161d23;
+  --text-secondary: #576e6a;
+  --text-muted: #7b918d;
+  --text-inverse: #ffffff;
+
+  --accent-primary: #e5b80b;
+  --accent-hover: #c9a20a;
+  --accent-soft: rgba(229, 184, 11, 0.12);
+
+  --brand-soft: #dbe7e4;
+  --brand-muted: #b8ccc7;
+
+  --border-light: #e8edec;
+  --border-default: #d2dbd9;
+  --border-strong: #b9c8c5;
+
+  --shadow-xs: 0 1px 2px rgba(22, 29, 35, 0.04);
+  --shadow-sm: 0 1px 3px rgba(22, 29, 35, 0.06), 0 1px 2px rgba(22, 29, 35, 0.04);
+  --shadow-md: 0 4px 12px rgba(22, 29, 35, 0.08), 0 2px 4px rgba(22, 29, 35, 0.04);
+  --shadow-lg: 0 12px 28px rgba(22, 29, 35, 0.12);
+
+  --status-pending-bg: #fef3c7;
+  --status-pending-text: #92400e;
+  --status-progress-bg: #dbeafe;
+  --status-progress-text: #1e40af;
+  --status-completed-bg: #d1fae5;
+  --status-completed-text: #065f46;
+
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.07);
+  --danger-border: rgba(220, 38, 38, 0.2);
+}
+
+@layer base {
+  body {
+    @apply min-h-screen antialiased;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--color-dark);
+  }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────────────── */
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold cursor-pointer;
+    background-color: var(--accent-primary);
+    color: var(--text-inverse);
+    box-shadow: var(--shadow-sm);
+    transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+  }
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer;
+    background-color: var(--bg-soft);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-muted);
+    border-color: var(--border-strong);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+    transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-soft);
+    color: var(--text-primary);
+  }
+
+  .btn-sm-edit {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer;
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
+    background-color: transparent;
+    transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+  }
+  .btn-sm-edit:hover {
+    background-color: var(--bg-soft);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+
+  .btn-sm-danger {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer;
+    border: 1px solid var(--danger-border);
+    color: var(--danger);
+    background-color: transparent;
+    transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+  }
+  .btn-sm-danger:hover {
+    background-color: var(--danger-soft);
+    border-color: rgba(220, 38, 38, 0.4);
+  }
+
+  /* ── Form fields ─────────────────────────────────── */
+
+  .input-field {
+    @apply w-full rounded-lg px-3 py-2.5 text-sm;
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-soft);
+    box-shadow: 0 0 0 3px rgba(94, 141, 131, 0.12);
+  }
+  .input-field::placeholder {
+    color: var(--text-muted);
+  }
+
+  .form-label {
+    @apply block text-xs font-medium uppercase tracking-wide mb-1.5;
+    color: var(--text-secondary);
+  }
+
+  /* ── Cards ───────────────────────────────────────── */
+
+  .card {
+    @apply rounded-xl p-5;
+    border: 1px solid var(--border-light);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-card {
+    @apply rounded-xl p-5;
+    border: 1px solid var(--border-light);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* ── Navigation ──────────────────────────────────── */
+
+  .nav-link {
+    @apply px-3 py-1.5 rounded-lg text-sm font-medium;
+    color: var(--text-secondary);
+    transition: all 150ms ease;
+  }
+  .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-soft);
+  }
+  .nav-link.active {
+    color: var(--color-dark);
+    background-color: var(--bg-soft);
+  }
+
+  /* ── Status badges ───────────────────────────────── */
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap;
+  }
+  .badge-pending {
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-text);
+  }
+  .badge-in-progress {
+    background-color: var(--status-progress-bg);
+    color: var(--status-progress-text);
+  }
+  .badge-completed {
+    background-color: var(--status-completed-bg);
+    color: var(--status-completed-text);
+  }
+
+  /* ── Table ───────────────────────────────────────── */
+
+  .table-row {
+    border-top: 1px solid var(--border-light);
+    transition: background-color 120ms ease;
+  }
+  .table-row:hover {
+    background-color: var(--bg-soft);
+  }
+
+  /* ── Alerts ──────────────────────────────────────── */
+
+  .error-alert {
+    @apply rounded-lg px-3.5 py-2.5 text-sm font-medium;
+    background-color: var(--danger-soft);
+    color: #b91c1c;
+    border: 1px solid var(--danger-border);
+  }
+
+  /* ── Sidebar ──────────────────────────────────────── */
+
+  .sidebar {
+    width: 248px;
+    flex-shrink: 0;
+    flex-direction: column;
+    padding-top: 1rem;
+    overflow-y: auto;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-light);
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium;
+    color: var(--text-secondary);
+    transition: all 120ms ease;
+    border-radius: 8px;
+    border-left: 2.5px solid transparent;
+  }
+  .sidebar-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-soft);
+  }
+  .sidebar-link.active {
+    color: var(--color-dark);
+    background-color: var(--accent-soft);
+    border-left-color: var(--accent-primary);
+    font-weight: 600;
+  }
+
+  .sidebar-bottom {
+    @apply flex items-center justify-between gap-2;
+    padding: 0.75rem 0.75rem;
+    margin: 0 0.5rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .sidebar-avatar {
+    @apply inline-flex items-center justify-center shrink-0 text-xs font-semibold;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background-color: var(--brand-soft);
+    color: var(--color-soft);
+  }
+
+  .sidebar-logout {
+    @apply inline-flex items-center justify-center cursor-pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    transition: all 120ms ease;
+  }
+  .sidebar-logout:hover {
+    color: var(--danger);
+    background-color: var(--danger-soft);
+  }
+
+  /* ── Page headings ───────────────────────────────── */
+
+  .page-title {
+    @apply text-xl font-semibold tracking-tight;
+    color: var(--color-dark);
+  }
+  .page-subtitle {
+    @apply text-sm mt-1;
+    color: var(--text-muted);
+  }
+}

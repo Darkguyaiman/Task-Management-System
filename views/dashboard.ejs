@@ -1,40 +1,29 @@
 <%- include('partials/header') %>
 
-<h1 class="mb-4">Dashboard</h1>
+<section class="space-y-8">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Overview of workload and due tasks.</p>
+  </div>
 
-<div class="row g-3">
-  <div class="col-12 col-md-6 col-lg-3">
-    <div class="card stat-card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 text-muted mb-2">Total Tasks</h2>
-        <p class="display-6 mb-0"><%= summary.total_tasks %></p>
-      </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card" style="border-top: 3px solid var(--color-dark);">
+      <p class="text-xs font-medium uppercase tracking-wide mb-3" style="color: var(--text-secondary);">Total Tasks</p>
+      <p class="text-3xl font-semibold" style="color: var(--color-dark);"><%= summary.total_tasks %></p>
+    </div>
+    <div class="stat-card" style="border-top: 3px solid var(--color-soft);">
+      <p class="text-xs font-medium uppercase tracking-wide mb-3" style="color: var(--text-secondary);">Completed</p>
+      <p class="text-3xl font-semibold" style="color: var(--color-soft);"><%= summary.completed_tasks %></p>
+    </div>
+    <div class="stat-card" style="border-top: 3px solid var(--accent-primary);">
+      <p class="text-xs font-medium uppercase tracking-wide mb-3" style="color: var(--text-secondary);">Pending</p>
+      <p class="text-3xl font-semibold" style="color: var(--accent-primary);"><%= summary.pending_tasks %></p>
+    </div>
+    <div class="stat-card" style="border-top: 3px solid var(--danger);">
+      <p class="text-xs font-medium uppercase tracking-wide mb-3" style="color: var(--text-secondary);">Due Today</p>
+      <p class="text-3xl font-semibold" style="color: var(--danger);"><%= summary.due_today %></p>
     </div>
   </div>
-  <div class="col-12 col-md-6 col-lg-3">
-    <div class="card stat-card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 text-muted mb-2">Completed Tasks</h2>
-        <p class="display-6 mb-0 text-success"><%= summary.completed_tasks %></p>
-      </div>
-    </div>
-  </div>
-  <div class="col-12 col-md-6 col-lg-3">
-    <div class="card stat-card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 text-muted mb-2">Pending Tasks</h2>
-        <p class="display-6 mb-0 text-warning"><%= summary.pending_tasks %></p>
-      </div>
-    </div>
-  </div>
-  <div class="col-12 col-md-6 col-lg-3">
-    <div class="card stat-card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 text-muted mb-2">Due Today</h2>
-        <p class="display-6 mb-0 text-danger"><%= summary.due_today %></p>
-      </div>
-    </div>
-  </div>
-</div>
+</section>
 
 <%- include('partials/footer') %>

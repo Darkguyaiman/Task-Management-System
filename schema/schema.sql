@@ -6,6 +6,8 @@ CREATE TABLE users (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   email VARCHAR(190) NOT NULL,
+  password VARCHAR(255) NULL,
+  role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT uq_users_email UNIQUE (email)
 );
@@ -37,6 +39,14 @@ CREATE TABLE tasks (
   INDEX idx_tasks_due_date (due_date),
   INDEX idx_tasks_user_status (user_id, status)
 );
+
+CREATE TABLE sessions (
+  session_id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL,
+  expires INT(11) UNSIGNED NOT NULL,
+  data MEDIUMTEXT COLLATE utf8mb4_bin,
+  PRIMARY KEY (session_id),
+  INDEX idx_sessions_expires (expires)
+) ENGINE=InnoDB;
 
 INSERT INTO kpi_categories (name) VALUES
   ('Customer Satisfaction'),

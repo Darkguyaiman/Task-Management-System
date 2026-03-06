@@ -1,0 +1,48 @@
+<% if (currentUser) { %>
+<aside class="sidebar hidden lg:flex">
+  <nav class="flex-1 px-3 space-y-0.5">
+    <a href="/" class="sidebar-link<%= currentPath === '/' ? ' active' : '' %>">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+      Dashboard
+    </a>
+    <a href="/tasks" class="sidebar-link<%= currentPath.startsWith('/tasks') ? ' active' : '' %>">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+      Tasks
+    </a>
+    <% if (currentUser.role === 'admin') { %>
+      <a href="/users" class="sidebar-link<%= currentPath.startsWith('/users') ? ' active' : '' %>">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2 2 0 013 17.208v-.103a7.002 7.002 0 0111.785-3.97M12 6a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+        </svg>
+        Users
+      </a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <span class="sidebar-avatar">
+        <%= currentUser.name.charAt(0).toUpperCase() %>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-[13px] font-medium truncate" style="color: var(--text-primary);"><%= currentUser.name %></p>
+        <p class="text-[11px] capitalize" style="color: var(--text-muted);"><%= currentUser.role %></p>
+      </div>
+    </div>
+    <form method="POST" action="/logout">
+      <button type="submit" class="sidebar-logout" title="Logout">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
+        </svg>
+      </button>
+    </form>
+  </div>
+</aside>
+<% } %>

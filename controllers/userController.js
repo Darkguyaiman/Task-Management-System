@@ -1,22 +1,23 @@
 const pool = require('../config/db');
+const bcrypt = require('bcryptjs');
+
+const fetchUsers = async () => {
+  const [users] = await pool.query(
+    `SELECT u.id, u.name, u.email, u.role, u.created_at
+     FROM users u
+     ORDER BY u.created_at DESC`
+  );
+  return users;
+};
 
 const listUsers = async (req, res, next) => {
   try {
-    const [users] = await pool.query(
-      `SELECT
-        u.id,
-        u.name,
-        u.email,
-        u.created_at
-      FROM users u
-      ORDER BY u.created_at DESC`
-    );
-
+    const users = await fetchUsers();
     res.render('users/index', {
       title: 'Users',
       users,
       formError: null,
-      oldInput: {}
+      oldInput: {},
     });
   } catch (error) {
     next(error);
@@ -24,24 +25,30 @@ const listUsers = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!name || !email) {
+  if (!name || !email || !password) {
     try {
-      const [users] = await pool.query(
-        `SELECT
-          u.id,
-          u.name,
-          u.email,
-          u.created_at
-        FROM users u
-        ORDER BY u.created_at DESC`
-      );
+      const users = await fetchUsers();
       return res.status(400).render('users/index', {
         title: 'Users',
         users,
-        formError: 'Name and email are required.',
-        oldInput: { name, email }
+        formError: 'Name, email, and password are required.',
+        oldInput: { name, email },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  if (password.length < 6) {
+    try {
+      const users = await fetchUsers();
+      return res.status(400).render('users/index', {
+        title: 'Users',
+        users,
+        formError: 'Password must be at least 6 characters.',
+        oldInput: { name, email },
       });
     } catch (error) {
       return next(error);
@@ -49,30 +56,21 @@ const createUser = async (req, res, next) => {
   }
 
   try {
+    const hash = await bcrypt.hash(password, 10);
     await pool.query(
-      `INSERT INTO users (name, email)
-       VALUES (?, ?)`,
-      [name.trim(), email.trim()]
+      `INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'staff')`,
+      [name.trim(), email.trim(), hash]
     );
-
     res.redirect('/users');
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       try {
-        const [users] = await pool.query(
-          `SELECT
-            u.id,
-            u.name,
-            u.email,
-            u.created_at
-          FROM users u
-          ORDER BY u.created_at DESC`
-        );
+        const users = await fetchUsers();
         return res.status(400).render('users/index', {
           title: 'Users',
           users,
           formError: 'Email already exists.',
-          oldInput: { name, email }
+          oldInput: { name, email },
         });
       } catch (queryError) {
         return next(queryError);
@@ -90,12 +88,7 @@ const deleteUser = async (req, res, next) => {
   }
 
   try {
-    await pool.query(
-      `DELETE FROM users
-       WHERE id = ?`,
-      [userId]
-    );
-
+    await pool.query(`DELETE FROM users WHERE id = ?`, [userId]);
     res.redirect('/users');
   } catch (error) {
     next(error);
@@ -105,5 +98,5 @@ const deleteUser = async (req, res, next) => {
 module.exports = {
   listUsers,
   createUser,
-  deleteUser
+  deleteUser,
 };
