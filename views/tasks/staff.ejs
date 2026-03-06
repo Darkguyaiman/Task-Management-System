@@ -1,0 +1,234 @@
+<%- include('../partials/header') %>
+
+<%
+  const hasFilters = filters.search || filters.status || filters.due_date;
+%>
+
+<section class="space-y-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="page-title">My Tasks</h1>
+      <p class="page-subtitle">Only tasks assigned to you are listed here.</p>
+    </div>
+  </div>
+
+  <div class="card overflow-hidden" style="padding: 0;">
+    <form method="GET" action="/tasks"
+      class="flex flex-wrap items-center gap-2 px-5 py-3"
+      style="background-color: var(--bg-soft); border-bottom: 1px solid var(--border-light);">
+      <div class="relative task-search-wrap" style="flex: 2 1 280px; min-width: 220px;">
+        <span class="task-search-icon" style="color: var(--text-muted); pointer-events: none;">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </span>
+        <input name="search" class="filter-input" style="width: 100%;"
+          placeholder="Search by title or description..."
+          value="<%= filters.search || '' %>" />
+      </div>
+
+      <select name="status" class="filter-input" style="width: auto; min-width: 120px;">
+        <option value="">All statuses</option>
+        <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+        <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+        <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+      </select>
+
+      <input name="due_date" type="date" class="filter-input" style="width: auto; min-width: 140px;"
+        value="<%= filters.due_date || '' %>" placeholder="Due date" />
+
+      <button type="submit" class="filter-btn filter-btn-apply">Filter</button>
+
+      <% if (hasFilters) { %>
+        <a href="/tasks" class="filter-btn filter-btn-reset">Clear</a>
+      <% } %>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr style="background-color: var(--bg-surface); border-bottom: 1px solid var(--border-light);">
+            <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Title</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">KPI</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Status</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Completion</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Due</th>
+            <th class="px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if ((tasks || []).length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-10 text-center text-sm" style="color: var(--text-muted);">
+                No tasks assigned to you yet.
+              </td>
+            </tr>
+          <% } %>
+          <% (tasks || []).forEach((task) => { %>
+            <tr class="table-row">
+              <td class="px-5 py-3 align-top">
+                <div class="text-sm font-medium" style="color: var(--text-primary);"><%= task.title %></div>
+                <% if (task.description) { %>
+                  <div class="text-xs mt-0.5" style="color: var(--text-muted);"><%= task.description %></div>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm whitespace-nowrap" style="color: var(--text-secondary);"><%= task.kpi_category_name %></td>
+              <td class="px-3 py-3 align-top">
+                <% if (task.status === 'pending') { %>
+                  <span class="badge badge-pending">Pending</span>
+                <% } else if (task.status === 'in_progress') { %>
+                  <span class="badge badge-in-progress">In Progress</span>
+                <% } else if (task.status === 'completed') { %>
+                  <span class="badge badge-completed">Completed</span>
+                <% } else { %>
+                  <span class="badge" style="background-color: var(--bg-soft); color: var(--text-secondary);"><%= task.status %></span>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top">
+                <% if (task.completion_status === 'submitted') { %>
+                  <span class="badge badge-completed">Submitted</span>
+                <% } else { %>
+                  <span class="badge badge-pending">Not Submitted</span>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm whitespace-nowrap" style="color: var(--text-secondary);">
+                <%= new Date(task.due_date).toLocaleDateString() %>
+              </td>
+              <td class="px-5 py-3 align-top text-right">
+                <div class="flex items-center justify-center gap-1">
+                  <a href="/tasks/<%= task.id %>" class="icon-btn" data-tooltip="View details">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5-9.75-7.5-9.75-7.5Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .filter-input {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .filter-input::placeholder {
+    color: var(--text-muted);
+  }
+  .task-search-wrap .filter-input {
+    padding-left: 2.25rem;
+  }
+  .task-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .filter-btn-apply {
+    background: var(--accent-primary);
+    color: var(--color-dark);
+  }
+  .filter-btn-apply:hover {
+    background: var(--accent-hover);
+  }
+  .filter-btn-reset {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+  }
+  .filter-btn-reset:hover {
+    background: var(--bg-muted);
+    color: var(--text-primary);
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .icon-btn:hover {
+    background-color: var(--bg-soft);
+    color: var(--color-dark);
+  }
+
+  .icon-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    background-color: var(--color-dark);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    border: 4px solid transparent;
+    border-top-color: var(--color-dark);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]:hover::after,
+  .icon-btn[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+</style>
+
+<%- include('../partials/footer') %>

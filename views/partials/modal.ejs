@@ -82,6 +82,12 @@
     color: var(--text-secondary);
     margin: 0 0 22px;
     line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    text-align: left;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
   .modal-actions {
@@ -158,22 +164,23 @@
       setTimeout(function () { overlay.style.display = 'none'; }, 200);
     }
 
-    function open(type, title, message, onResult) {
+    function open(type, title, message, onResult, options) {
       iconWrapper.className = 'modal-icon-wrapper modal-icon-' + type;
       iconWrapper.innerHTML = icons[type] || icons.confirm;
       titleEl.textContent = title;
       messageEl.textContent = message;
       actionsEl.innerHTML = '';
+      var opts = options || {};
 
       if (type === 'confirm') {
         var cancelBtn = document.createElement('button');
         cancelBtn.className = 'modal-btn modal-btn-cancel';
-        cancelBtn.textContent = 'Cancel';
+        cancelBtn.textContent = opts.cancelText || 'Cancel';
         cancelBtn.onclick = function () { close(); if (onResult) onResult(false); };
 
         var okBtn = document.createElement('button');
         okBtn.className = 'modal-btn modal-btn-danger';
-        okBtn.textContent = 'Delete';
+        okBtn.textContent = opts.confirmText || 'Delete';
         okBtn.onclick = function () { close(); if (onResult) onResult(true); };
 
         actionsEl.appendChild(cancelBtn);
@@ -209,7 +216,9 @@
 
     window.AlertModal = {
       success: function (title, message, cb) { open('success', title, message, cb); },
-      confirm: function (title, message, cb) { open('confirm', title, message, cb); },
+      confirm: function (title, message, cb, confirmText) {
+        open('confirm', title, message, cb, { confirmText: confirmText });
+      },
       error: function (title, message, cb) { open('error', title, message, cb); }
     };
   })();

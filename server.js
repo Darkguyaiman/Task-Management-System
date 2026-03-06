@@ -5,6 +5,7 @@ const pool = require('./config/db');
 const indexRoutes = require('./routes/indexRoutes');
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const session = require('express-session');
@@ -24,8 +25,8 @@ if (isProduction) {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const sessionStore = new MySQLStore(
@@ -73,6 +74,7 @@ app.use(authRoutes);
 app.use('/', indexRoutes);
 app.use('/users', userRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/reports', reportRoutes);
 app.use('/profile', profileRoutes);
 
 app.use((req, res) => {

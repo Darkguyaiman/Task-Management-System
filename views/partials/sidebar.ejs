@@ -17,6 +17,17 @@
       Tasks
     </a>
     <% if (currentUser.role === 'admin') { %>
+      <a href="/reports" class="sidebar-link<%= currentPath.startsWith('/reports') ? ' active' : '' %>">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v16.5h16.5" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.25 2.25L16.5 9.75" />
+          <circle cx="7.5" cy="15" r="1.1" fill="currentColor" stroke="none" />
+          <circle cx="10.5" cy="12" r="1.1" fill="currentColor" stroke="none" />
+          <circle cx="12.75" cy="14.25" r="1.1" fill="currentColor" stroke="none" />
+          <circle cx="16.5" cy="9.75" r="1.1" fill="currentColor" stroke="none" />
+        </svg>
+        Reports
+      </a>
       <a href="/users" class="sidebar-link<%= currentPath.startsWith('/users') ? ' active' : '' %>">
         <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2 2 0 013 17.208v-.103a7.002 7.002 0 0111.785-3.97M12 6a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -68,6 +79,13 @@
     <span class="bottomnav-label">Tasks</span>
   </a>
   <% if (currentUser.role === 'admin') { %>
+    <a href="/reports" class="bottomnav-item<%= currentPath.startsWith('/reports') ? ' active' : '' %>">
+      <svg class="bottomnav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v16.5h16.5" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.25 2.25L16.5 9.75" />
+      </svg>
+      <span class="bottomnav-label">Reports</span>
+    </a>
     <a href="/users" class="bottomnav-item<%= currentPath.startsWith('/users') ? ' active' : '' %>">
       <svg class="bottomnav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2 2 0 013 17.208v-.103a7.002 7.002 0 0111.785-3.97M12 6a3 3 0 11-6 0 3 3 0 016 0zm8.25 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />

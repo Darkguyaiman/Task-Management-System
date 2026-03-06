@@ -1,0 +1,375 @@
+<%- include('../partials/header') %>
+
+<section class="space-y-6">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="page-title">Task Details</h1>
+      <p class="page-subtitle">Review your assignment and submit completion proof.</p>
+    </div>
+    <a href="/tasks" class="btn-secondary">Back to My Tasks</a>
+  </div>
+
+  <article class="card space-y-4">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-semibold" style="color: var(--text-primary);"><%= task.title %></h2>
+        <% if (task.description) { %>
+          <p class="text-sm mt-1" style="color: var(--text-muted);"><%= task.description %></p>
+        <% } %>
+      </div>
+      <% if (task.status === 'pending') { %>
+        <span class="badge badge-pending">Pending</span>
+      <% } else if (task.status === 'in_progress') { %>
+        <span class="badge badge-in-progress">In Progress</span>
+      <% } else { %>
+        <span class="badge badge-completed">Completed</span>
+      <% } %>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <div><strong>KPI:</strong> <span style="color: var(--text-secondary);"><%= task.kpi_category_name %></span></div>
+      <div><strong>Due Date:</strong> <span style="color: var(--text-secondary);"><%= new Date(task.due_date).toLocaleDateString() %></span></div>
+      <div><strong>Assignment Status:</strong> <span style="color: var(--text-secondary);"><%= task.completion_status === 'submitted' ? 'Submitted' : 'Not Submitted' %></span></div>
+      <div><strong>Last Submitted:</strong> <span style="color: var(--text-secondary);"><%= task.completion_submitted_at ? new Date(task.completion_submitted_at).toLocaleString() : 'Never' %></span></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3 class="text-sm font-semibold mb-3" style="color: var(--text-primary);">Submit Completion</h3>
+
+    <% if (task.proof_path) { %>
+      <div class="current-proof-box mb-5">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="current-proof-label">Current Proof</p>
+            <a href="/<%= task.proof_path %>" target="_blank" rel="noopener noreferrer" class="current-proof-link">
+              <%= task.proof_original_name || 'View file' %>
+            </a>
+            <% if (task.proof_size_bytes) { %>
+              <p class="current-proof-meta"><%= Math.ceil(task.proof_size_bytes / 1024) %> KB</p>
+            <% } %>
+          </div>
+          <span class="badge badge-completed">Final</span>
+        </div>
+      </div>
+    <% } %>
+
+    <% const isLocked = task.completion_status === 'submitted'; %>
+    <% if (isLocked) { %>
+      <div class="locked-note mb-5">
+        Completion already submitted. This task is locked for changes. Contact admin if you need it reopened.
+      </div>
+    <% } %>
+
+    <form id="completionForm" data-task-id="<%= task.id %>">
+      <label class="form-label">Remarks</label>
+      <textarea id="remarksInput" class="input-field resize-y" rows="4" placeholder="Explain what you completed..." <%= isLocked ? 'disabled' : '' %>><%= task.completion_remarks || '' %></textarea>
+
+      <label class="form-label mt-4">Proof File</label>
+      <div id="uploadDropzone" class="upload-dropzone <%= isLocked ? 'is-disabled' : '' %>" role="button" tabindex="0" aria-label="Upload proof file" <%= isLocked ? 'aria-disabled="true"' : '' %>>
+        <input id="proofInput" type="file" class="upload-input-hidden" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" <%= isLocked ? 'disabled' : '' %> />
+        <div class="upload-dropzone-content">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V8m0 0-3 3m3-3 3 3M4.5 15.75v1.125A2.625 2.625 0 0 0 7.125 19.5h9.75a2.625 2.625 0 0 0 2.625-2.625V15.75" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15A8.25 8.25 0 0 1 12 6.75a8.25 8.25 0 0 1 8.25 8.25" />
+          </svg>
+          <p class="upload-dropzone-title">Drag and drop your file here</p>
+          <p class="upload-dropzone-subtitle">or click to browse</p>
+          <p id="selectedFileText" class="upload-selected-text">No file selected</p>
+        </div>
+      </div>
+      <p class="text-xs mt-1" style="color: var(--text-muted);">
+        Optional file. 5MB max. Only PDF docs, JPG, and PNG are allowed.
+      </p>
+
+      <div id="uploadProgressWrap" class="upload-progress mt-4" hidden>
+        <div id="uploadProgressBar" class="upload-progress-bar"></div>
+      </div>
+      <p id="uploadMessage" class="text-xs mt-2" style="color: var(--text-muted);"></p>
+
+      <div class="mt-4">
+        <button id="submitBtn" type="submit" class="btn-primary" <%= isLocked ? 'disabled' : '' %>><%= isLocked ? 'Submission Locked' : 'Submit Completion' %></button>
+      </div>
+    </form>
+  </article>
+</section>
+
+<style>
+  .upload-progress {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #e7eceb;
+    overflow: hidden;
+  }
+  .upload-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #5e8d83, #3b7b6d);
+    transition: width 0.2s ease;
+  }
+
+  .current-proof-box {
+    border: 1.5px solid #8bb8ad;
+    background: linear-gradient(180deg, #f3fbf8, #ebf6f2);
+    border-radius: 12px;
+    padding: 0.9rem;
+    box-shadow: 0 1px 2px rgba(22, 29, 35, 0.05);
+  }
+
+  .current-proof-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: #36655c;
+    margin-bottom: 0.2rem;
+  }
+
+  .current-proof-link {
+    display: block;
+    margin-top: 0.2rem;
+    color: #1b5e54;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .current-proof-meta {
+    margin-top: 0.15rem;
+    font-size: 12px;
+    color: #4f7c74;
+  }
+
+  .locked-note {
+    border: 1px solid #fcd9a5;
+    background: #fff8ed;
+    color: #8a5a12;
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .upload-dropzone {
+    margin-top: 0.2rem;
+    border: 1.5px dashed var(--border-default);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff, #f8fbfa);
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .upload-dropzone:hover,
+  .upload-dropzone.is-active {
+    border-color: var(--color-soft);
+    background: #f4faf8;
+    box-shadow: 0 0 0 3px rgba(94, 141, 131, 0.12);
+  }
+
+  .upload-dropzone.is-disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: #f6f7f7;
+    border-color: #d4dbd9;
+    box-shadow: none;
+  }
+
+  .upload-dropzone-content {
+    text-align: center;
+    color: var(--text-secondary);
+    display: grid;
+    justify-items: center;
+    gap: 0.28rem;
+  }
+
+  .upload-dropzone-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .upload-dropzone-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .upload-selected-text {
+    margin-top: 0.2rem;
+    font-size: 12px;
+    color: var(--color-soft);
+    font-weight: 500;
+  }
+
+  .upload-input-hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  (function () {
+    var CHUNK_SIZE = <%= Number(chunkSizeKb) * 1024 %>;
+    var MAX_SIZE = <%= Number(maxFileSizeMb) * 1024 * 1024 %>;
+
+    var form = document.getElementById('completionForm');
+    var input = document.getElementById('proofInput');
+    var remarksInput = document.getElementById('remarksInput');
+    var progressWrap = document.getElementById('uploadProgressWrap');
+    var progressBar = document.getElementById('uploadProgressBar');
+    var messageEl = document.getElementById('uploadMessage');
+    var submitBtn = document.getElementById('submitBtn');
+    var dropzone = document.getElementById('uploadDropzone');
+    var selectedFileText = document.getElementById('selectedFileText');
+    var taskId = form.getAttribute('data-task-id');
+    var allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/pjpeg'];
+    var isLocked = submitBtn.hasAttribute('disabled');
+
+    function setMessage(text, isError) {
+      messageEl.textContent = text || '';
+      messageEl.style.color = isError ? '#b91c1c' : 'var(--text-muted)';
+    }
+
+    function setSelectedFile(file) {
+      if (!file) {
+        selectedFileText.textContent = 'No file selected';
+        return;
+      }
+      var sizeKb = Math.round(file.size / 1024);
+      selectedFileText.textContent = file.name + ' (' + sizeKb + ' KB)';
+    }
+
+    function isAllowedType(file) {
+      return allowedTypes.indexOf((file.type || '').toLowerCase()) !== -1;
+    }
+
+    function toBase64(buffer) {
+      var binary = '';
+      var bytes = new Uint8Array(buffer);
+      var step = 0x8000;
+      for (var i = 0; i < bytes.length; i += step) {
+        var chunk = bytes.subarray(i, i + step);
+        binary += String.fromCharCode.apply(null, chunk);
+      }
+      return btoa(binary);
+    }
+
+    async function uploadInChunks(file, remarks) {
+      var totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      var uploadId = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+
+      for (var index = 0; index < totalChunks; index += 1) {
+        var start = index * CHUNK_SIZE;
+        var end = Math.min(start + CHUNK_SIZE, file.size);
+        var chunkBuffer = await file.slice(start, end).arrayBuffer();
+
+        var response = await fetch('/tasks/' + taskId + '/completion/chunk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            upload_id: uploadId,
+            file_name: file.name,
+            mime_type: file.type || 'application/octet-stream',
+            total_size: file.size,
+            total_chunks: totalChunks,
+            chunk_index: index,
+            chunk_base64: toBase64(chunkBuffer),
+            remarks: remarks
+          })
+        });
+
+        var payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.message || 'Upload failed.');
+        }
+
+        var percent = Math.round(((index + 1) / totalChunks) * 100);
+        progressBar.style.width = percent + '%';
+        setMessage('Uploading... ' + percent + '%', false);
+      }
+    }
+
+    if (isLocked) {
+      setMessage('Submission is locked. Contact admin to reopen.', false);
+      return;
+    }
+
+    dropzone.addEventListener('click', function () {
+      input.click();
+    });
+
+    dropzone.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        input.click();
+      }
+    });
+
+    dropzone.addEventListener('dragover', function (event) {
+      event.preventDefault();
+      dropzone.classList.add('is-active');
+    });
+
+    dropzone.addEventListener('dragleave', function () {
+      dropzone.classList.remove('is-active');
+    });
+
+    dropzone.addEventListener('drop', function (event) {
+      event.preventDefault();
+      dropzone.classList.remove('is-active');
+      if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        input.files = event.dataTransfer.files;
+        setSelectedFile(input.files[0]);
+      }
+    });
+
+    input.addEventListener('change', function () {
+      setSelectedFile(input.files && input.files[0] ? input.files[0] : null);
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      var file = input.files && input.files[0];
+
+      submitBtn.disabled = true;
+      progressWrap.hidden = false;
+      progressBar.style.width = '0%';
+      setMessage('', false);
+
+      try {
+        if (!file) {
+          progressWrap.hidden = true;
+          var response = await fetch('/tasks/' + taskId + '/completion/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ remarks: remarksInput.value || '' })
+          });
+          var payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.message || 'Submission failed.');
+          }
+          setMessage('Completion submitted successfully. Reloading...', false);
+        } else {
+          if (file.size > MAX_SIZE) {
+            throw new Error('Proof file must be 5MB or smaller.');
+          }
+          if (!isAllowedType(file)) {
+            throw new Error('Only PDF, JPG, and PNG files are allowed.');
+          }
+          await uploadInChunks(file, remarksInput.value || '');
+          setMessage('Proof submitted successfully. Reloading...', false);
+        }
+
+        setTimeout(function () { window.location.reload(); }, 700);
+      } catch (error) {
+        setMessage(error.message || 'Upload failed.', true);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
+</script>
+
+<%- include('../partials/footer') %>

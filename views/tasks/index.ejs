@@ -1,191 +1,410 @@
 <%- include('../partials/header') %>
 
+<%
+  const hasFilters = filters.search || filters.user_id || filters.status || filters.due_date;
+%>
+
 <section class="space-y-8">
-  <div>
-    <h1 class="page-title">Tasks</h1>
-    <p class="page-subtitle">Create and manage tasks, and control who they are assigned to.</p>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="page-title">Tasks</h1>
+      <p class="page-subtitle">Create and manage tasks, and control which staff are assigned.</p>
+    </div>
+    <a href="/tasks/new" class="btn-primary">+ Add Task</a>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] gap-6">
-    <div class="space-y-6">
-      <div class="card space-y-4">
-        <h2 class="text-sm font-semibold" style="color: var(--color-dark);">Create Task</h2>
-
-        <% if (formError) { %>
-          <div class="error-alert"><%= formError %></div>
-        <% } %>
-
-        <form method="POST" action="/tasks" class="space-y-4">
-          <div>
-            <label class="form-label" for="user_id">User</label>
-            <select id="user_id" name="user_id" required class="input-field">
-              <option value="">Choose user</option>
-              <% users.forEach((user) => { %>
-                <option value="<%= user.id %>" <%= String(oldInput.user_id || '') === String(user.id) ? 'selected' : '' %>>
-                  <%= user.name %> (<%= user.email %>)
-                </option>
-              <% }) %>
-            </select>
-          </div>
-
-          <div>
-            <label class="form-label" for="kpi_category_id">KPI Category</label>
-            <select id="kpi_category_id" name="kpi_category_id" required class="input-field">
-              <option value="">Choose category</option>
-              <% categories.forEach((category) => { %>
-                <option value="<%= category.id %>" <%= String(oldInput.kpi_category_id || '') === String(category.id) ? 'selected' : '' %>>
-                  <%= category.name %>
-                </option>
-              <% }) %>
-            </select>
-          </div>
-
-          <div>
-            <label class="form-label" for="title">Title</label>
-            <input id="title" name="title" required class="input-field"
-              value="<%= oldInput.title || '' %>" />
-          </div>
-
-          <div>
-            <label class="form-label" for="description">Description</label>
-            <textarea id="description" name="description" rows="3"
-              class="input-field resize-y"><%= oldInput.description || '' %></textarea>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="form-label" for="status">Status</label>
-              <select id="status" name="status" required class="input-field">
-                <option value="pending" <%= (oldInput.status || '') === 'pending' ? 'selected' : '' %>>Pending</option>
-                <option value="in_progress" <%= (oldInput.status || '') === 'in_progress' ? 'selected' : '' %>>In Progress</option>
-                <option value="completed" <%= (oldInput.status || '') === 'completed' ? 'selected' : '' %>>Completed</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label" for="due_date">Due Date</label>
-              <input id="due_date" name="due_date" type="date" required class="input-field"
-                value="<%= oldInput.due_date || '' %>" />
-            </div>
-          </div>
-
-          <div class="pt-1">
-            <button type="submit" class="btn-primary">Create Task</button>
-          </div>
-        </form>
+  <div class="card overflow-hidden" style="padding: 0;">
+    <!-- Inline filter bar (same style as users) -->
+    <form method="GET" action="/tasks"
+      class="flex flex-wrap items-center gap-2 px-5 py-3"
+      style="background-color: var(--bg-soft); border-bottom: 1px solid var(--border-light);">
+      <div class="relative task-search-wrap" style="flex: 2 1 280px; min-width: 220px;">
+        <span class="task-search-icon" style="color: var(--text-muted); pointer-events: none;">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </span>
+        <input name="search" class="filter-input" style="width: 100%;"
+          placeholder="Search by title or description..."
+          value="<%= filters.search || '' %>" />
       </div>
 
-      <div class="card space-y-4">
-        <h2 class="text-sm font-semibold" style="color: var(--color-dark);">Filters</h2>
-        <form method="GET" action="/tasks" class="space-y-4">
-          <div>
-            <label class="form-label" for="filter_user">User</label>
-            <select id="filter_user" name="user_id" class="input-field">
-              <option value="">All users</option>
-              <% users.forEach((user) => { %>
-                <option value="<%= user.id %>" <%= String(filters.user_id || '') === String(user.id) ? 'selected' : '' %>>
-                  <%= user.name %>
-                </option>
-              <% }) %>
-            </select>
-          </div>
+      <select name="user_id" class="filter-input" style="width: auto; min-width: 130px;">
+        <option value="">All staff</option>
+        <% (staff || []).forEach((s) => { %>
+          <option value="<%= s.id %>" <%= String(filters.user_id || '') === String(s.id) ? 'selected' : '' %>><%= s.name %></option>
+        <% }) %>
+      </select>
 
-          <div>
-            <label class="form-label" for="filter_status">Status</label>
-            <select id="filter_status" name="status" class="input-field">
-              <option value="">All statuses</option>
-              <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
-              <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
-              <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
-            </select>
-          </div>
+      <select name="status" class="filter-input" style="width: auto; min-width: 120px;">
+        <option value="">All statuses</option>
+        <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+        <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+        <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+      </select>
 
-          <div>
-            <label class="form-label" for="filter_due_date">Due Date</label>
-            <input id="filter_due_date" name="due_date" type="date" class="input-field"
-              value="<%= filters.due_date || '' %>" />
-          </div>
+      <input name="due_date" type="date" class="filter-input" style="width: auto; min-width: 140px;"
+        value="<%= filters.due_date || '' %>" placeholder="Due date" />
 
-          <div class="flex gap-2">
-            <button type="submit" class="btn-secondary flex-1">Apply</button>
-            <a href="/tasks" class="btn-ghost flex-1 text-center">Reset</a>
-          </div>
-        </form>
-      </div>
-    </div>
+      <button type="submit" class="filter-btn filter-btn-apply">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+        </svg>
+        Filter
+      </button>
 
-    <div class="card space-y-4 overflow-hidden">
-      <div>
-        <h2 class="text-sm font-semibold" style="color: var(--color-dark);">Task List</h2>
-        <p class="text-xs mt-0.5" style="color: var(--text-muted);">
-          <%= tasks.length %> task<%= tasks.length !== 1 ? 's' : '' %> found.
-        </p>
-      </div>
+      <% if (hasFilters) { %>
+        <a href="/tasks" class="filter-btn filter-btn-reset">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Clear
+        </a>
+      <% } %>
+    </form>
 
-      <div class="overflow-x-auto -mx-5">
-        <table class="min-w-full text-sm" style="border-top: 1px solid var(--border-light);">
-          <thead>
-            <tr style="background-color: var(--bg-soft);">
-              <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">ID</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Title</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">User</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">KPI</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Status</th>
-              <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Due</th>
-              <th class="px-5 py-2.5 text-right text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Actions</th>
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr style="background-color: var(--bg-surface); border-bottom: 1px solid var(--border-light);">
+            <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Title</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Staff</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">KPI</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Status</th>
+            <th class="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Due</th>
+            <th class="px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wide" style="color: var(--text-secondary);">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (tasks.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-10 text-center text-sm" style="color: var(--text-muted);">
+                No tasks found. <a href="/tasks/new" style="color: var(--color-soft); text-decoration: underline;">Create one</a> or adjust filters.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            <% if (tasks.length === 0) { %>
-              <tr>
-                <td colspan="7" class="px-5 py-10 text-center text-sm" style="color: var(--text-muted);">
-                  No tasks found. Create one or adjust your filters.
-                </td>
-              </tr>
-            <% } %>
-            <% tasks.forEach((task) => { %>
-              <tr class="table-row">
-                <td class="px-5 py-3 align-top text-xs whitespace-nowrap" style="color: var(--text-muted);">#<%= task.id %></td>
-                <td class="px-3 py-3 align-top">
-                  <div class="text-sm font-medium" style="color: var(--text-primary);"><%= task.title %></div>
-                  <% if (task.description) { %>
-                    <div class="text-xs mt-0.5" style="color: var(--text-muted);"><%= task.description %></div>
-                  <% } %>
-                </td>
-                <td class="px-3 py-3 align-top text-sm whitespace-nowrap"><%= task.user_name %></td>
-                <td class="px-3 py-3 align-top text-sm whitespace-nowrap"><%= task.kpi_category_name %></td>
-                <td class="px-3 py-3 align-top">
-                  <% if (task.status === 'pending') { %>
-                    <span class="badge badge-pending">Pending</span>
-                  <% } else if (task.status === 'in_progress') { %>
-                    <span class="badge badge-in-progress">In Progress</span>
-                  <% } else if (task.status === 'completed') { %>
-                    <span class="badge badge-completed">Completed</span>
-                  <% } else { %>
-                    <span class="badge" style="background-color: var(--bg-soft); color: var(--text-secondary);"><%= task.status %></span>
-                  <% } %>
-                </td>
-                <td class="px-3 py-3 align-top text-sm whitespace-nowrap">
-                  <%= new Date(task.due_date).toLocaleDateString() %>
-                </td>
-                <td class="px-5 py-3 align-top text-right whitespace-nowrap">
-                  <div class="flex items-center justify-end gap-2">
-                    <a href="/tasks/<%= task.id %>/edit" class="btn-sm-edit">Edit</a>
-                    <form method="POST" action="/tasks/<%= task.id %>/delete" class="inline delete-form">
-                      <button type="button" class="btn-sm-danger"
-                        onclick="confirmDeleteTask(this)">Delete</button>
-                    </form>
+          <% } %>
+          <% tasks.forEach((task) => { %>
+            <tr class="table-row">
+              <td class="px-5 py-3 align-top">
+                <div class="text-sm font-medium" style="color: var(--text-primary);"><%= task.title %></div>
+                <% if (task.description) { %>
+                  <div class="text-xs mt-0.5" style="color: var(--text-muted);"><%= task.description %></div>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top">
+                <%
+                  const taskStaff = task.assigned_staff || [];
+                  const showChips = taskStaff.slice(0, 2);
+                  const restStaff = taskStaff.slice(2);
+                  const hasMore = restStaff.length > 0;
+                %>
+                <% if (taskStaff.length === 0) { %>
+                  <span style="color: var(--text-muted);">—</span>
+                <% } else { %>
+                  <div class="task-staff-chips">
+                    <% showChips.forEach((s) => { %>
+                      <span class="task-staff-chip">
+                        <span class="task-staff-chip-avatar"><%= (s.name || '?').charAt(0).toUpperCase() %></span>
+                        <span class="task-staff-chip-name"><%= s.name %></span>
+                      </span>
+                    <% }) %>
+                    <% if (hasMore) { %>
+                      <button type="button" class="task-staff-view-more"
+                        data-task-title="<%- (task.title || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;') %>"
+                        data-staff-names="<%- taskStaff.map(s => s.name).join('\u241E').replace(/&/g, '&amp;').replace(/"/g, '&quot;') %>"
+                        onclick="openStaffModal(this)">
+                        View more (<%= restStaff.length %>)
+                      </button>
+                    <% } %>
                   </div>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm" style="color: var(--text-secondary);">
+                <% const kpis = task.kpi_categories || []; %>
+                <% if (kpis.length === 0) { %>
+                  <span style="color: var(--text-muted);">-</span>
+                <% } else { %>
+                  <div class="task-kpi-chips">
+                    <% kpis.forEach((kpi) => { %>
+                      <span class="task-kpi-chip"><%= kpi.name %></span>
+                    <% }) %>
+                  </div>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top">
+                <% if (task.status === 'pending') { %>
+                  <span class="badge badge-pending">Pending</span>
+                <% } else if (task.status === 'in_progress') { %>
+                  <span class="badge badge-in-progress">In Progress</span>
+                <% } else if (task.status === 'completed') { %>
+                  <span class="badge badge-completed">Completed</span>
+                <% } else { %>
+                  <span class="badge" style="background-color: var(--bg-soft); color: var(--text-secondary);"><%= task.status %></span>
+                <% } %>
+              </td>
+              <td class="px-3 py-3 align-top text-sm whitespace-nowrap" style="color: var(--text-secondary);">
+                <%= new Date(task.due_date).toLocaleDateString() %>
+              </td>
+              <td class="px-5 py-3 align-top text-right">
+                <div class="flex items-center justify-center gap-1">
+                  <a href="/tasks/<%= task.id %>/submissions" class="icon-btn" data-tooltip="Submissions">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25v13.5A2.25 2.25 0 0 1 18.75 21H5.25A2.25 2.25 0 0 1 3 18.75V5.25Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3.75h9m-9 3.75h6" />
+                    </svg>
+                  </a>
+                  <% if ((task.assigned_staff || []).some((s) => String(s.id) === String(currentUser.id))) { %>
+                    <a href="/tasks/<%= task.id %>" class="icon-btn" data-tooltip="My Submission">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c0 0 3.75-7.5 9.75-7.5s9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5S2.25 12 2.25 12Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </a>
+                  <% } %>
+                  <a href="/tasks/<%= task.id %>/edit" class="icon-btn" data-tooltip="Edit task">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                  </a>
+                  <form method="POST" action="/tasks/<%= task.id %>/delete" class="inline delete-form">
+                    <button type="button" class="icon-btn icon-btn-danger" data-tooltip="Delete task"
+                      onclick="confirmDeleteTask(this)">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
 
+<style>
+  .filter-input {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .filter-input::placeholder {
+    color: var(--text-muted);
+  }
+  .task-search-wrap .filter-input {
+    padding-left: 2.25rem;
+  }
+  .task-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .task-search-icon svg {
+    display: block;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .filter-btn-apply {
+    background: var(--accent-primary);
+    color: var(--color-dark);
+  }
+  .filter-btn-apply:hover {
+    background: var(--accent-hover);
+  }
+  .filter-btn-reset {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+  }
+  .filter-btn-reset:hover {
+    background: var(--bg-muted);
+    color: var(--text-primary);
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .icon-btn:hover {
+    background-color: var(--bg-soft);
+    color: var(--color-dark);
+  }
+  .icon-btn-danger:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+  }
+
+  .icon-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    background-color: var(--color-dark);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    border: 4px solid transparent;
+    border-top-color: var(--color-dark);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .icon-btn[data-tooltip]:hover::after,
+  .icon-btn[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  .task-staff-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  @media (max-width: 640px) {
+    .task-staff-chips {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  .task-staff-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 4px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-muted) 100%);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .task-staff-chip:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .task-staff-chip-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--color-soft);
+    color: var(--color-white, #fff);
+    flex-shrink: 0;
+  }
+  .task-staff-chip-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .task-staff-view-more {
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px dashed var(--border-light);
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--color-soft);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .task-staff-view-more:hover {
+    background: var(--bg-soft);
+    color: var(--color-dark);
+    border-color: var(--color-soft);
+  }
+  .task-kpi-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 300px;
+  }
+  .task-kpi-chip {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-light);
+    background: var(--bg-soft);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+</style>
+
 <script>
+  function openStaffModal(btn) {
+    var title = btn.getAttribute('data-task-title') || 'Participants';
+    var raw = btn.getAttribute('data-staff-names');
+    var names = raw ? raw.split('\u241E').filter(Boolean) : [];
+    var lines = names.map(function (name, i) { return (i + 1) + '. ' + name; });
+    var message = lines.length ? lines.join('\n') : 'No staff assigned.';
+    AlertModal.success(title, message, function () {});
+  }
+
   function confirmDeleteTask(btn) {
     var form = btn.closest('form');
     AlertModal.confirm(
@@ -194,6 +413,7 @@
       function (confirmed) { if (confirmed) form.submit(); }
     );
   }
+
 </script>
 
 <%- include('../partials/footer') %>

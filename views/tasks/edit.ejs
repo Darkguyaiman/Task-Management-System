@@ -1,5 +1,11 @@
 <%- include('../partials/header') %>
 
+<%
+  const selectedKpiIds = Array.isArray(selectedKpiCategoryIds)
+    ? selectedKpiCategoryIds
+    : (task && task.kpi_category_id ? [task.kpi_category_id] : []);
+%>
+
 <section class="space-y-8">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
@@ -29,14 +35,15 @@
           </div>
 
           <div>
-            <label class="form-label" for="kpi_category_id">KPI Category</label>
-            <select id="kpi_category_id" name="kpi_category_id" required class="input-field">
-              <% categories.forEach((category) => { %>
-                <option value="<%= category.id %>" <%= String(task.kpi_category_id) === String(category.id) ? 'selected' : '' %>>
-                  <%= category.name %>
-                </option>
-              <% }) %>
-            </select>
+            <label class="form-label">KPI Categories</label>
+            <%- include('../partials/kpi-multiselect', {
+              categories: categories || [],
+              selectedIds: selectedKpiIds,
+              inputName: 'kpi_category_ids',
+              inputId: 'task-edit-legacy',
+              placeholderText: 'Choose KPI categories...',
+              searchPlaceholder: 'Search KPI categories...'
+            }) %>
           </div>
         </div>
 

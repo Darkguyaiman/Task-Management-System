@@ -1,0 +1,93 @@
+<%- include('../partials/header') %>
+
+<%
+  const isEdit = typeof task !== 'undefined' && task !== null;
+  const heading = isEdit ? 'Edit Task #' + task.id : 'Add Task';
+  const subtitle = isEdit ? 'Update task details and assigned staff.' : 'Create a new task and assign staff.';
+  const actionUrl = isEdit ? '/tasks/' + task.id + '/update' : '/tasks';
+  const submitLabel = isEdit ? 'Update Task' : 'Create Task';
+
+  const titleVal = (typeof oldInput !== 'undefined' && oldInput.title) ? oldInput.title : (isEdit ? task.title : '');
+  const descriptionVal = (typeof oldInput !== 'undefined' && oldInput.description != null) ? oldInput.description : (isEdit ? (task.description || '') : '');
+  const selectedKpiIds = (typeof oldInput !== 'undefined' && Array.isArray(oldInput.kpi_category_ids))
+    ? oldInput.kpi_category_ids
+    : (typeof selectedKpiCategoryIds !== 'undefined' && Array.isArray(selectedKpiCategoryIds))
+      ? selectedKpiCategoryIds
+      : (isEdit && task.kpi_category_id ? [task.kpi_category_id] : []);
+  const statusVal = (typeof oldInput !== 'undefined' && oldInput.status) ? oldInput.status : (isEdit ? task.status : 'pending');
+  const dueVal = (typeof oldInput !== 'undefined' && oldInput.due_date) ? oldInput.due_date : (isEdit ? new Date(task.due_date).toISOString().split('T')[0] : '');
+  const selectedStaffIds = (typeof oldInput !== 'undefined' && Array.isArray(oldInput.staff_ids)) ? oldInput.staff_ids : (isEdit && Array.isArray(assignedStaffIds) ? assignedStaffIds : []);
+%>
+
+<section class="space-y-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="page-title"><%= heading %></h1>
+      <p class="page-subtitle"><%= subtitle %></p>
+    </div>
+    <a href="/tasks" class="btn-ghost">Back to Tasks</a>
+  </div>
+
+  <div class="w-full">
+    <div class="card space-y-5">
+      <% if (typeof formError !== 'undefined' && formError) { %>
+        <div class="error-alert"><%= formError %></div>
+      <% } %>
+
+      <form method="POST" action="<%= actionUrl %>" class="space-y-5">
+        <div>
+          <label class="form-label">Staff</label>
+          <p class="text-xs mt-0.5 mb-1" style="color: var(--text-muted);">Select one or more staff to assign to this task.</p>
+          <%- include('../partials/staff-multiselect', { staff: staff || [], selectedIds: selectedStaffIds, inputName: 'staff_ids', inputId: isEdit ? 'edit' : 'add' }) %>
+        </div>
+
+        <div>
+          <label class="form-label">KPI Categories</label>
+          <p class="text-xs mt-0.5 mb-1" style="color: var(--text-muted);">Select one or more KPI categories for this task.</p>
+          <%- include('../partials/kpi-multiselect', {
+            categories: categories || [],
+            selectedIds: selectedKpiIds,
+            inputName: 'kpi_category_ids',
+            inputId: isEdit ? 'task-edit' : 'task-add',
+            placeholderText: 'Choose KPI categories...',
+            searchPlaceholder: 'Search KPI categories...'
+          }) %>
+        </div>
+
+        <div>
+          <label class="form-label" for="title">Title</label>
+          <input id="title" name="title" required class="input-field" placeholder="Task title"
+            value="<%= titleVal %>" />
+        </div>
+
+        <div>
+          <label class="form-label" for="description">Description</label>
+          <textarea id="description" name="description" rows="4" class="input-field resize-y" placeholder="Optional description"><%= descriptionVal %></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="form-label" for="status">Status</label>
+            <select id="status" name="status" required class="input-field">
+              <option value="pending" <%= statusVal === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="in_progress" <%= statusVal === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+              <option value="completed" <%= statusVal === 'completed' ? 'selected' : '' %>>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="due_date">Due Date</label>
+            <input id="due_date" name="due_date" type="date" required class="input-field"
+              value="<%= dueVal %>" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" class="btn-primary"><%= submitLabel %></button>
+          <a href="/tasks" class="btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
